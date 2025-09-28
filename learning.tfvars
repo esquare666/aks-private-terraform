@@ -44,7 +44,7 @@ system_vm_size        = "Standard_D4ds_v5"
 user_node_count     = 1
 user_node_min_count = 1
 user_node_max_count = 3
-user_vm_size        = "Standard_D4s_v5" # 4 vCPUs, 16GB RAM
+user_vm_size        = "Standard_D4ds_v4"
 
 # Azure AD Integration
 # Get these from: az ad group create --display-name "AKS Administrators" --mail-nickname "aks-admins"

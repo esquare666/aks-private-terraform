@@ -20,18 +20,18 @@ resource "azurerm_user_assigned_identity" "uai_aks_private" {
 
 # Role assignment for AKS identity to manage network resources
 # Make sure the automation account (SP) has Role Based Access Control Administrator RBAC in the resource group or subscription level
-# resource "azurerm_role_assignment" "aks_network_contributor" {
-#   scope                = azurerm_virtual_network.aks_private_vnet.id
-#   role_definition_name = "Network Contributor"
-#   principal_id         = azurerm_user_assigned_identity.uai_aks_private.principal_id
-# }
+resource "azurerm_role_assignment" "aks_network_contributor" {
+  scope                = azurerm_virtual_network.aks_private_vnet.id
+  role_definition_name = "Network Contributor"
+  principal_id         = azurerm_user_assigned_identity.uai_aks_private.principal_id
+}
 
-# # Role assignment for AKS identity to manage DNS
-# resource "azurerm_role_assignment" "aks_dns_contributor" {
-#   scope                = azurerm_private_dns_zone.aks_pvt_dns_zone.id
-#   role_definition_name = "Private DNS Zone Contributor"
-#   principal_id         = azurerm_user_assigned_identity.uai_aks_private.principal_id
-# }
+# Role assignment for AKS identity to manage DNS
+resource "azurerm_role_assignment" "aks_dns_contributor" {
+  scope                = azurerm_private_dns_zone.aks_pvt_dns_zone.id
+  role_definition_name = "Private DNS Zone Contributor"
+  principal_id         = azurerm_user_assigned_identity.uai_aks_private.principal_id
+}
 
 # AKS Cluster
 resource "azurerm_kubernetes_cluster" "aks_pvt_cluster" {
@@ -189,21 +189,23 @@ resource "azurerm_kubernetes_cluster" "aks_pvt_cluster" {
   # }
 
   # These role assigned in Subscription level
-  # depends_on = [
-  #   azurerm_role_assignment.aks_network_contributor,
-  #   azurerm_role_assignment.aks_dns_contributor,
-  # ]
+  depends_on = [
+    azurerm_role_assignment.aks_network_contributor,
+    azurerm_role_assignment.aks_dns_contributor,
+  ]
 }
 
 # User node pool for applications
 resource "azurerm_kubernetes_cluster_node_pool" "user" {
   name                  = "user"
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.main.id
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.aks_pvt_cluster.id
   vm_size               = var.user_vm_size
   zones                 = var.availability_zones
-  vnet_subnet_id        = azurerm_subnet.aks.id
+  vnet_subnet_id        = azurerm_subnet.aks_private_subnet.id
 
   # Auto-scaling configuration
+  auto_scaling_enabled = true
+  # `max_count` and `min_count` must be set to `null` when auto_scaling_enabled is set to `false`
   min_count  = var.user_node_min_count
   max_count  = var.user_node_max_count
   node_count = var.user_node_count
@@ -211,7 +213,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "user" {
   # Node configuration
   max_pods        = 30
   os_disk_size_gb = 128
-  os_disk_type    = "Premium_SSD"
+  os_disk_type    = "Ephemeral" # expected os_disk_type to be one of ["Ephemeral" "Managed"], got Premium_SSD
   os_type         = "Linux"
 
   #   # Taints for user workloads
