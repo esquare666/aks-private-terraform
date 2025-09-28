@@ -36,6 +36,7 @@ override.tf.json
 .terraformrc
 terraform.rc
 .terraform
+# .terraform.lock.hcl
 
 # VS Code specific
 .vscode
