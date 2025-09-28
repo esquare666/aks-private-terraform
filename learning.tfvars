@@ -69,7 +69,7 @@ jumpbox_admin_username = "azureuser"
 # SSH Public Key for Jumpbox (replace with your public key)
 # Generate with: ssh-keygen -t rsa -b 4096 -C "test@example.nz"
 # Then: cat ~/.ssh/id_rsa.pub
-jumpbox_ssh_public_key = ""
+jumpbox_ssh_public_key = "<public-key-for-ssh>"
 
 # Security Configuration
 enable_network_policy = true
