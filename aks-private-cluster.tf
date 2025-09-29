@@ -240,3 +240,10 @@ resource "azurerm_role_assignment" "aks_acr_pull" {
   role_definition_name = "AcrPull"
   principal_id         = azurerm_kubernetes_cluster.aks_pvt_cluster.kubelet_identity[0].object_id
 }
+
+# Role assignment for Private DNS Zone Contributor for DNS entries to manage - Ingress hostnames to manage
+resource "azurerm_role_assignment" "aks_webapprouting_dns_contributor" {
+  scope                = azurerm_private_dns_zone.aks_pvt_dns_zone.id
+  role_definition_name = "Private DNS Zone Contributor"
+  principal_id         = data.azurerm_user_assigned_identity.webapprouting_uai.principal_id
+}
