@@ -245,5 +245,6 @@ resource "azurerm_role_assignment" "aks_acr_pull" {
 resource "azurerm_role_assignment" "aks_webapprouting_dns_contributor" {
   scope                = azurerm_private_dns_zone.aks_pvt_dns_zone.id
   role_definition_name = "Private DNS Zone Contributor"
-  principal_id         = data.azurerm_user_assigned_identity.webapprouting_uai.principal_id
+  principal_id         = azurerm_kubernetes_cluster.aks_pvt_cluster.web_app_routing[0].web_app_routing_identity[0].object_id
+  # principal_id         = data.azurerm_user_assigned_identity.webapprouting_uai.principal_id
 }
